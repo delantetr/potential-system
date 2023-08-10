@@ -5,18 +5,15 @@ const secret = 'mysecretsshhhhh';
 const expiration = '2h';
 
 module.exports = {
-  // function for our authenticated routes
-  authMiddleware: function (req, res, next) {
-    // allows token to be sent via  req.query or headers
-    let token = req.query.token || req.headers.authorization;
-
-    // ["Bearer", "<tokenvalue>"]
-    if (req.headers.authorization) {
-      token = token.split(' ').pop().trim();
+  authMiddleware: function (context) {
+    const authHeader = context.req.headers.authorization;
+    if (!authHeader) {
+      throw new Error('Authentication token missing');
     }
 
+    const token = authHeader.replace('Bearer ', '');
     if (!token) {
-      return res.status(400).json({ message: 'You have no token!' });
+      throw new Error('Authentication token not provided');
     }
 
     // verify token and get user data out of it
