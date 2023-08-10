@@ -4,19 +4,19 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    users: async (_, __, context) => {
+    users: async (parent, args, user) => {
         // Ensure the user is authenticated
-        if (!context.user) {
+        if (!user) {
           throw new AuthenticationError('You must be logged in to view this information');
         }
   
-        const foundUser = await User.findOne({ _id: context.user.id }).populate('savedBooks');
+        const foundUser = await User.findOne({ _id: user.id }).populate('savedBooks');
         return foundUser;
       },
   },
 
   Mutation: {
-    login: async (_, { email, password }) => {
+    login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) {
         throw new AuthenticationError('Invalid credentials');
@@ -31,7 +31,7 @@ const resolvers = {
       return { token, user };
     },
 
-    addUser: async (_, args) => {
+    addUser: async (parent, args) => {
       try {
         const user = await User.create(args);
         const token = signToken(user);
@@ -42,14 +42,14 @@ const resolvers = {
       }
     },
 
-    saveBook: async (_, { input }, context) => {
-      if (!context.user) {
+    saveBook: async (parent, { input }, user) => {
+      if (!user) {
         throw new AuthenticationError('You must be logged in to save a book');
       }
 
       try {
         const updatedUser = await User.findOneAndUpdate(
-          { _id: context.user.id },
+          { _id: user.id },
           { $addToSet: { savedBooks: input } },
           { new: true, runValidators: true }
         ).populate('savedBooks');
@@ -61,14 +61,14 @@ const resolvers = {
       }
     },
 
-    removeBook: async (_, { bookId }, context) => {
-      if (!context.user) {
+    removeBook: async (parent, { bookId }, user) => {
+      if (!user) {
         throw new AuthenticationError('You must be logged in to remove a book');
       }
 
       try {
         const updatedUser = await User.findOneAndUpdate(
-          { _id: context.user.id },
+          { _id: user.id },
           { $pull: { savedBooks: { bookId } } },
           { new: true }
         ).populate('savedBooks');
