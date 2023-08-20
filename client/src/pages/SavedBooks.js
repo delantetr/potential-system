@@ -8,8 +8,14 @@ import { REMOVE_BOOK } from '../utils/mutations';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const { loading, data: userData } = useQuery(GET_ME);
-  const [removeBook] = useMutation(REMOVE_BOOK);
+  const { loading, data: userData } = useQuery(GET_ME, {
+    context: { 
+    headers: {Authorization: `Bearer ${Auth.getToken()}` }
+  }});
+  const [removeBook] = useMutation(REMOVE_BOOK, {
+    context: { 
+    headers: {Authorization: `Bearer ${Auth.getToken()}` }
+  }});
 
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
@@ -36,8 +42,12 @@ const SavedBooks = () => {
     return <h2>LOADING...</h2>;
   }
 
+  console.log('userData:', userData);
+  
   const user = userData?.me || {};
 
+  console.log('user.savedBooks:', user.savedBooks);
+  
   return (
     <>
       <div fluid className="text-light bg-dark p-5">
@@ -47,7 +57,7 @@ const SavedBooks = () => {
       </div>
       <Container>
         <h2 className='pt-5'>
-          {user.savedBooks.length
+          {user.savedBooks?.length
             ? `Viewing ${user.savedBooks.length} saved ${user.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
