@@ -11,7 +11,13 @@ const SignupForm = () => {
   const [showAlert, setShowAlert] = useState(false);
 
   // Use the useMutation hook for ADD_USER mutation
-  const [addUser, { error }] = useMutation(ADD_USER);
+  const [createUser, { error }] = useMutation(ADD_USER, {
+    context: { 
+      headers: {
+        Authorization: `Bearer ${Auth.getToken()}` 
+      }
+    }
+  });
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -29,16 +35,20 @@ const SignupForm = () => {
 
     try {
       // Use the addUser mutation
-      const { data } = await addUser({
+      const { data } = await createUser({
         variables: { ...userFormData },
       });
-
-      Auth.login(data.addUser.token);
+  
+      console.log('Mutation response:', data); // Add this line to see the response
+  
+      if (data.createUser.token) {
+        Auth.login(data.createUser.token);
+      }
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
-
+  
     setUserFormData({
       username: '',
       email: '',
