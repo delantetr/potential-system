@@ -72,13 +72,9 @@ const SearchBooks = () => {
     try {
       console.log("Saving book to User's savedBooks array: ", bookData); // Add this line
       const response = await saveBook({
-        variables: {
-          bookId: bookData.bookId,
-          authors: bookData.authors,
-          description: bookData.description,
-          image: bookData.image,
-          title: bookData.title
-        },
+        variables: { 
+          bookData: { ...bookData },
+        }
       });
   
       console.log('Mutation response:', response); // Add this line

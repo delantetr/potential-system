@@ -71,24 +71,17 @@ const resolvers = {
       }
     },
 
-    saveBook: async (parent, { authors,  description, bookId, image, link, title }, context) => { // Update input to bookData
+    saveBook: async (parent, { bookData }, context) => { // Update input to bookData
       if (!context.user) {
         console.log('User not authenticated');
         throw new AuthenticationError('You must be logged in to save a book');
       }
   
       try {
-        console.log('Saving book:', authors,  description, bookId, image, link, title);
+        console.log('Saving book:', bookData);
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $addToSet: { savedBooks: 
-            authors,
-            description,
-            bookId,
-            image,
-            link,
-            title 
-          }},
+          { $addToSet: { savedBooks: bookData }},
           { new: true, runValidators: true }
         ).populate('savedBooks');
 
